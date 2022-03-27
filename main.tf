@@ -1,10 +1,12 @@
 terraform {
+#required providers block to support building resources based on the providers and version specified
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "=2.98.0"
     }
   }
+# State stored in TFC, state snapshots are local to allow CLI-driven workflow
   backend "remote" {
     hostname     = "app.terraform.io"
     organization = "rpecor"
