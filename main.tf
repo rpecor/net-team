@@ -47,9 +47,27 @@ resource "azurerm_virtual_network" "net-hub" {
   tags = local.tags
 }
 
-# resource "azurerm_virtual_network_peering" "peer-h2s" {
-#   name                      = "${local.naming}-peer-h2s"
-#   resource_group_name       = azurerm_resource_group.example.name
-#   virtual_network_name      = azurerm_virtual_network.net-hub.name
-#   remote_virtual_network_id = data.terraform_remote_state.dev-team-infra-np.spoke_vnet_id
-# }
+data "terraform_remote_state" "dev-team-infra-np" {
+  backend = "remote"
+
+  config = {
+    organization = "rpecor"
+    workspaces = {
+      name = "dev-team-infra-np"
+    }
+   }
+}
+
+resource "azurerm_virtual_network_peering" "peer-h2s" {
+  name                      = "${local.naming}-peer-h2s"
+  resource_group_name       = azurerm_resource_group.net-rg.name
+  virtual_network_name      = azurerm_virtual_network.net-hub.name
+  remote_virtual_network_id = data.terraform_remote_state.dev-team-infra-np.outputs.spoke_vnet_id
+}
+
+resource "azurerm_virtual_network_peering" "peer-s2h" {
+  name                      = "${local.naming}-peer-s2h"
+  resource_group_name       = data.terraform_remote_state.dev-team-infra-np.outputs.spoke_rg_name
+  virtual_network_name      = data.terraform_remote_state.dev-team-infra-np.outputs.spoke_vnet_name
+  remote_virtual_network_id = azurerm_virtual_network.net-hub.id
+}
