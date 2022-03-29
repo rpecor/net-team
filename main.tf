@@ -47,6 +47,7 @@ resource "azurerm_virtual_network" "net-hub" {
   tags = local.tags
 }
 
+# Data source to leverage shared remote state. 
 data "terraform_remote_state" "dev-team-infra-np" {
   backend = "remote"
 
@@ -62,6 +63,8 @@ resource "azurerm_virtual_network_peering" "peer-h2s" {
   name                      = "${local.naming}-peer-h2s"
   resource_group_name       = azurerm_resource_group.net-rg.name
   virtual_network_name      = azurerm_virtual_network.net-hub.name
+
+  # Referencing an output from the Development team workspace to complete peering.
   remote_virtual_network_id = data.terraform_remote_state.dev-team-infra-np.outputs.spoke_vnet_id
 }
 
